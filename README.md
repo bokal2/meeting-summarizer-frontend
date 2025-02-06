@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Meeting Summarizer App Front-End
+This is a **Next.js** application that allows users to upload meeting audio files, select a base model, and generate a summary using a [backend API](https://github.com/bokal2/meeting-summarizer-backend).
 
-First, run the development server:
+### **Features**
+- Upload audio files (`.mp3`) for transcription and summarization.
+- Select a base model (e.g., `Amazon Titan`, `GPT-4`, `Whisper`).
+- View meeting summaries, sentiment analysis, and key discussion issues.
+- Responsive UI with **ShadCN UI** components.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Installation & Setup
+### Clone the repository
+```sh
+git clone https://github.com/bokal2/meeting-summarizer-frontend.git
+cd meeting-summarizer-frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ** Install dependencies**
+```sh
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ** Start the development server**
+```sh
+npm run dev
+```
+The app runs on **`http://localhost:3000`**.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## **Run with Docker**
+### **Build the Docker image**
+```sh
+docker build -t meeting-summary-app .
+```
 
-To learn more about Next.js, take a look at the following resources:
+### **Run the container**
+```sh
+docker run -p 3000:3000 --name meeting-summary-container meeting-summary-app
+```
+Your app is now available at **`http://localhost:3000`**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### **Stop & Remove the Container**
+```sh
+docker stop meeting-summary-container
+docker rm meeting-summary-container
+docker rmi meeting-summary-app
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## **API Call**
+The app sends a request to the backend:
+```sh
+curl -X POST "http://127.0.0.1:8000/summary" \
+-H "Content-Type: multipart/form-data" \
+-F "file=@meeting_audio.mp3" \
+-F "model_id=amazon.titan-text-lite-v1"
+```
+**Example API Response:**
+```json
+{
+  "response": {
+    "topic": "Project Updates",
+    "meeting_summary": "The meeting discussed progress on the Q1 deliverables...",
+    "sentiment": "positive",
+    "issues": [
+      {
+        "topic": "Timeline Delay",
+        "summary": "The team noted delays in the design phase."
+      }
+    ]
+  }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## **License**
+This project is licensed under the **MIT License**.
