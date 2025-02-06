@@ -1,101 +1,130 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Navbar from "@/components/ui/Navbar";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner"; // For notifications
+
+export default function Dashboard() {
+  const [file, setFile] = useState<File | null>(null);
+  const [selectedModel, setSelectedModel] = useState("amazon.titan-text-lite-v1"); // Default model
+  const [summaryData, setSummaryData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("model_id", selectedModel);
+
+    try {
+      setLoading(true);
+      const response = await fetch("http://127.0.0.1:8000/summary", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch summary");
+
+      const data = await response.json();
+      setSummaryData(data.response);
+      toast.success("Summary generated successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error generating summary.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar />
+      <div className="container mx-auto p-6 space-y-6">
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {/* Upload Section */}
+        <Card className="shadow-lg rounded-xl">
+          <CardHeader>
+            <CardTitle>Upload Meeting Audio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Label htmlFor="file-upload">Select an MP3 file:</Label>
+              <Input
+                id="file-upload"
+                type="file"
+                accept="audio/mpeg"
+                onChange={handleFileChange}
+              />
+
+              <Label>Select Base Model:</Label>
+              <Select onValueChange={(value) => setSelectedModel(value)} defaultValue={selectedModel}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="amazon.titan-text-lite-v1">Amazon Titan Lite</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button onClick={handleUpload} disabled={loading} className="w-full">
+                {loading ? "Processing..." : "Generate Summary"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Separator />
+
+        {summaryData && (
+          <Card className="shadow-lg rounded-xl">
+            <CardHeader>
+              <CardTitle>Meeting Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <strong>Topic:</strong> {summaryData.topic}
+              </div>
+              <div>
+                <strong>Sentiment:</strong>
+                <span className={`ml-2 px-2 py-1 rounded-lg text-white ${summaryData.sentiment === "positive" ? "bg-green-500" : "bg-red-500"}`}>
+                  {summaryData.sentiment}
+                </span>
+              </div>
+              <Textarea value={summaryData.meeting_summary} readOnly className="w-full h-32" />
+
+              {summaryData.issues.length > 0 && (
+                <div>
+                  <strong>Issues:</strong>
+                  <ul className="list-disc ml-5 mt-2">
+                    {summaryData.issues.map((issue: any, index: number) => (
+                      <li key={index} className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mt-2">
+                        <strong>{issue.topic}:</strong> {issue.summary}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
