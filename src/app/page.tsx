@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner"; // For notifications
 
+const API_URL = process.env.API_URL;
+
 export default function Dashboard() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedModel, setSelectedModel] = useState("amazon.titan-text-lite-v1"); // Default model
@@ -35,7 +37,7 @@ export default function Dashboard() {
 
     try {
       setLoading(true);
-      const response = await fetch("http://127.0.0.1:8000/summary", {
+      const response = await fetch(`${API_URL}/summary`, {
         method: "POST",
         body: formData,
       });
